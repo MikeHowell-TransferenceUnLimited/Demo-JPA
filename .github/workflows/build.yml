@@ -42,27 +42,40 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          until pg_isready -h localhost -p 5432; do
+            echo "⏳ Waiting for Postgres..."
+            sleep 2
+          done
+
+      - name: Initialise the database schema
+        run: |
+          psql -h localhost -U appuser -d northwind -f schema.sql
+        env:
+          PGPASSWORD: "!appuser123!"
+
       - name: Build the app
         run: mvn clean package -DskipTests
 
       - name: Run the app and test it starts
         run: |
           java -DSPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/northwind \
-          -DSPRING_DATASOURCE_USERNAME=appuser \
-          -DSPRING_DATASOURCE_PASSWORD=!appuser123! \
-          -jar target/*.jar &
-          
+               -DSPRING_DATASOURCE_USERNAME=appuser \
+               -DSPRING_DATASOURCE_PASSWORD=!appuser123! \
+               -jar target/*.jar &
+
           echo "Waiting for app to become healthy..."
 
-            for i in {1..10}; do
-              if curl -f http://localhost:8008/api/customers; then
-                echo "✅ App is up!"
-                exit 0
-              else
-                echo "⏳ Still waiting..."
-                sleep 3
-              fi
-            done
+          for i in {1..10}; do
+            if curl -f http://localhost:8008/api/customers; then
+              echo "✅ App is up!"
+              exit 0
+            else
+              echo "⏳ Still waiting..."
+              sleep 3
+            fi
+          done
 
-            echo "❌ App did not respond in time"
-            exit 1
+          echo "❌ App did not respond in time"
+          exit 1
