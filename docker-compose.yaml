@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:15
+    container_name: northwind-db
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_DB: northwind
+      POSTGRES_PASSWORD: "!appuser123!"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+
+  app:
+    build: .
+    # In practice, let docker come up with a name for your container (based on the containing
+    # folder's name), that way, multiple containers can be launched, each container will have an
+    # index number.  This is for scaling purposes.  To do this, remove the line below:
+    container_name: demo-jpa
+    depends_on:
+      - db
+    restart: on-failure
+    ports:
+      - "8008:8008"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/northwind
+      SPRING_DATASOURCE_USERNAME: appuser
+      SPRING_DATASOURCE_PASSWORD: "!appuser123!"
+    networks:
+      - backend
+
+volumes:
+  pgdata:
+    name: pgdata         # This gives it a stable name for reuse
+    external: false      # Set to true only if manually created
+    driver: local
+
+networks:
+  backend:
+
