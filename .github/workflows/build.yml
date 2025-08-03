@@ -50,6 +50,19 @@ jobs:
           java -DSPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/northwind \
           -DSPRING_DATASOURCE_USERNAME=appuser \
           -DSPRING_DATASOURCE_PASSWORD=!appuser123! \
-          -jar target/*.jar
-          sleep 10
-          curl -f http://localhost:8008/api/customers || (echo "App failed to start" && exit 1)
+          -jar target/*.jar &
+          
+          echo "Waiting for app to become healthy..."
+
+            for i in {1..10}; do
+              if curl -f http://localhost:8008/api/customers; then
+                echo "✅ App is up!"
+                exit 0
+              else
+                echo "⏳ Still waiting..."
+                sleep 3
+              fi
+            done
+
+            echo "❌ App did not respond in time"
+            exit 1
