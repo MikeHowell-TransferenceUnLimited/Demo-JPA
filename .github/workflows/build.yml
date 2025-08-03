@@ -51,7 +51,7 @@ jobs:
 
       - name: Initialise the database schema
         run: |
-          psql -h localhost -U appuser -d northwind -f schema.sql
+          psql -h localhost -U appuser -d northwind -f schema/schema.sql
         env:
           PGPASSWORD: "!appuser123!"
 
