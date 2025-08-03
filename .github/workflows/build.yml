@@ -47,6 +47,9 @@ jobs:
 
       - name: Run the app and test it starts
         run: |
-          java -jar target/*.jar &
+          java -DSPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/northwind \
+          -DSPRING_DATASOURCE_USERNAME=appuser \
+          -DSPRING_DATASOURCE_PASSWORD=!appuser123! \
+          -jar target/*.jar
           sleep 10
           curl -f http://localhost:8008/api/customers || (echo "App failed to start" && exit 1)
