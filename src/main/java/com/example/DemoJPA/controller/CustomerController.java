@@ -24,7 +24,7 @@ public class CustomerController
     // Get all customers
     @GetMapping()
     public List<CustomerDto> getCustomers() {
-        logger.info("Fetching customers from CustomerService");
+        logger.info("Fetching customers from CustomerService...");
         return customerService.getAllCustomerDtos();
     }
 
