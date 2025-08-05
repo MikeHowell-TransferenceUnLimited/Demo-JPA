@@ -31,7 +31,7 @@ public class CustomerController
     // Get a specific customer
     @GetMapping("/{id}")
     public CustomerDto getCustomers(@PathVariable String id) {
-        logger.info("Fetching customer " + id + " from CustomerService");
+        logger.info("Fetching customer " + id + " from CustomerService...");
         return customerService.getCustomerDtoById(id);
     }
 
